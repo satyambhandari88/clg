@@ -12,7 +12,7 @@ const StudentLogin = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await axios.post('http://localhost:5000/api/auth/student/login', { rollNumber, email, password });
+      const { data } = await axios.post('https://backend-9doo.onrender.com/api/auth/student/login', { rollNumber, email, password });
       localStorage.setItem('studentToken', data.token);
       localStorage.setItem('studentInfo', JSON.stringify(data));
       alert('Login Successful');
