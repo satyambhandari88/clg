@@ -18,7 +18,7 @@ const AddTeacher = () => {
 
   const fetchTeachers = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/teachers');
+      const response = await axios.get('https://backend-9doo.onrender.com/api/admin/teachers');
       setTeachers(response.data.teachers || []); // Default to an empty array if undefined
     } catch (error) {
       console.error('Error fetching teachers:', error);
@@ -33,7 +33,7 @@ const AddTeacher = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/admin/add-teacher', formData);
+      const response = await axios.post('https://backend-9doo.onrender.com/api/admin/add-teacher', formData);
       alert(response.data.message);
       fetchTeachers(); // Refresh the teacher list
       setFormData({
