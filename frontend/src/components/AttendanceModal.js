@@ -26,7 +26,7 @@ const AttendanceModal = ({ student, classDetails, onClose, onSuccess }) => {
       });
       
   
-      const response = await fetch('http://localhost:5000/api/student/attendance', {
+      const response = await fetch('https://backend-9doo.onrender.com/api/student/attendance', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
