@@ -1,0 +1,69 @@
+/* Style for TeacherLogin component */
+.teacher-login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f7fc;
+  }
+  
+  .teacher-login-form {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .teacher-login-form h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .teacher-login-form input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .teacher-login-form input:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  .teacher-login-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .teacher-login-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  .teacher-login-form p {
+    color: red;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 10px;
+  }
+  
+  .teacher-login-form .error-message {
+    text-align: center;
+    margin-top: 15px;
+    color: #ff0000;
+    font-size: 14px;
+  }
+  

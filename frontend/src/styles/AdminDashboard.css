@@ -1,0 +1,76 @@
+/* Admin Dashboard Container */
+.admin-dashboard-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+  }
+  
+  /* Admin Dashboard Box */
+  .admin-dashboard-box {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    text-align: center;
+  }
+  
+  /* Title */
+  .admin-dashboard-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+  }
+  
+  /* Welcome Text */
+  .admin-dashboard-welcome {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 20px;
+  }
+  
+  /* Links Section */
+  .admin-dashboard-links {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* Individual Link */
+  .dashboard-link {
+    display: inline-block;
+    text-decoration: none;
+    color: #fff;
+    background: #007bff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: background 0.3s ease, transform 0.2s ease;
+    text-align: center;
+  }
+  
+  .dashboard-link:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 480px) {
+    .admin-dashboard-box {
+      width: 90%;
+    }
+  
+    .admin-dashboard-title {
+      font-size: 22px;
+    }
+  
+    .dashboard-link {
+      font-size: 14px;
+      padding: 8px 15px;
+    }
+  }
+  

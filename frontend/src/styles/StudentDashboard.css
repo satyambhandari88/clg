@@ -1,0 +1,185 @@
+/* StudentDashboard.css */
+
+.studentdashboard-container {
+    font-family: 'Arial', sans-serif;
+    margin: 20px;
+    padding: 20px;
+    background-color: #f5f7fa;
+  }
+  
+  .studentdashboard-title {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .card {
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+  }
+  
+  .card-header {
+    background: #0073e6;
+    color: white;
+    padding: 15px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+  
+  .card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .card-content {
+    padding: 15px;
+  }
+  
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  .info-label {
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .info-value {
+    color: #333;
+  }
+  
+  .loading-text,
+  .no-data {
+    font-size: 1rem;
+    color: #777;
+    text-align: center;
+  }
+  
+  .notification-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .notification-card {
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #ddd;
+  }
+  
+  .notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .notification-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .notification-subtitle {
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  .notification-details {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  
+  .attendance-button {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #0073e6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+  }
+  
+  .attendance-button:hover {
+    background: #45a049;
+  }
+  
+  .status-badge {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    border-radius: 5px;
+    color: white;
+  }
+  
+  .status-badge.active {
+    background: #4caf50;
+  }
+  
+  .status-badge.expired {
+    background: #f44336;
+  }
+  .status-badge.marked {
+    background: rgb(31, 31, 92);
+  }
+  .status-badge.starting_soon {
+    background: #ff9800;
+  }
+  
+  .status-badge.upcoming {
+    background:rgb(40, 40, 224) ;
+  }
+  .status-badge.present {
+    background: #4caf50;
+  }
+  
+  .status-badge.absent {
+    background: #f44336;
+  }
+  
+  .history-card .table-container {
+    overflow-x: auto;
+  }
+  
+  .attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .attendance-table th,
+  .attendance-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  .attendance-table th {
+    background: #f1f1f1;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .attendance-table td span {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: white;
+  }
+  
+  .attendance-table td .present {
+    background: #4caf50;
+  }
+  
+  .attendance-table td .absent {
+    background: #f44336;
+  }
+  

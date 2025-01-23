@@ -1,0 +1,84 @@
+/* Overall Container */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    font-family: 'Arial', sans-serif;
+    background: white;
+    color: #fff;
+    min-height: 100vh;
+  }
+  
+  /* Dashboard Box */
+  .dashboard-box {
+    background: #ffffff;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    width: 400px;
+    text-align: center;
+  }
+  
+  /* Title */
+  .dashboard-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  /* Form Inputs */
+  .dashboard-form .form-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+  
+  .dashboard-form .form-input:focus {
+    border-color: #6a11cb;
+  }
+  
+  /* Submit Button */
+  .dashboard-form .form-button {
+    width: 100%;
+    padding: 12px;
+    background: #2575fc;
+    color: #fff;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+  }
+  
+  .dashboard-form .form-button:hover {
+    background: #0056b3;
+  }
+
+
+  .code{
+    background-color: #333;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 480px) {
+    .dashboard-box {
+      width: 90%;
+    }
+  
+    .dashboard-title {
+      font-size: 20px;
+    }
+  
+    .dashboard-form .form-button {
+      font-size: 14px;
+    }
+  }
+  
