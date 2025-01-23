@@ -32,7 +32,7 @@ const CSVUpload = ({ onUploadSuccess }) => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/admin/upload-csv', {
+      const response = await fetch('https://backend-9doo.onrender.com/api/admin/upload-csv', {
         method: 'POST',
         body: formData,
       });
@@ -116,7 +116,7 @@ const AddStudent = () => {
 
   const fetchStudents = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/admin/students');
+      const response = await fetch('https://backend-9doo.onrender.com/api/admin/students');
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || 'Failed to fetch students');
@@ -134,7 +134,7 @@ const AddStudent = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/admin/add-student', {
+      const response = await fetch('https://backend-9doo.onrender.com/api/admin/add-student', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
