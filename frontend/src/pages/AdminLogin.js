@@ -10,7 +10,7 @@ const AdminLogin = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:5000/api/auth/admin/login', { email, password });
+      const { data } = await axios.post('https://backend-9doo.onrender.com/api/auth/admin/login', { email, password });
       localStorage.setItem('adminToken', data.token);
       alert('Login Successful');
       window.location.href = '/admin/dashboard'; // Redirect to Admin Dashboard
