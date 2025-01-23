@@ -19,7 +19,7 @@ const StudentDashboard = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await fetch(`https://backend-9doo.onrender.com/student/notifications/${student.rollNumber}`, {
+      const response = await fetch(`https://backend-9doo.onrender.com/api/student/notifications/${student.rollNumber}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -98,7 +98,7 @@ const StudentDashboard = () => {
 
   const fetchAttendanceHistory = async () => {
     try {
-      const response = await fetch(`https://backend-9doo.onrender.com/student/attendance-history/${student.rollNumber}`, {
+      const response = await fetch(`https://backend-9doo.onrender.com/api/student/attendance-history/${student.rollNumber}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
