@@ -17,7 +17,7 @@ const AddClass = () => {
 
   const fetchClasses = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/admin/classes');
+      const response = await axios.get('https://backend-9doo.onrender.com/api/admin/classes');
       setClasses(response.data.classes);
     } catch (error) {
       console.error('Error fetching classes:', error);
@@ -31,7 +31,7 @@ const AddClass = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/admin/add-class', formData);
+      const response = await axios.post('https://backend-9doo.onrender.com/api/admin/add-class', formData);
       alert(response.data.message);
       fetchClasses(); // Refresh the class list
       setFormData({ className: '', longitude: '', latitude: '', radius: '' });
