@@ -30,7 +30,7 @@ const CSVUpload = ({ onUploadSuccess }) => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/admin/upload-csv', {
+      const response = await fetch('https://backend-9doo.onrender.com/api/admin/upload-csv', {
         method: 'POST',
         body: formData,
       });
