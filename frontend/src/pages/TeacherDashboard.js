@@ -26,7 +26,7 @@ const TeacherDashboard = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('teacherToken');
-      const response = await axios.post('https://backend-9doo.onrender.com/api/teacher/create-class', formData, {
+      const response = await axios.post('https://backend-9doo.onrender.com/teacher/create-class', formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
