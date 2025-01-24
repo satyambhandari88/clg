@@ -15,7 +15,7 @@ const StudentDashboard = () => {
 
   const student = useMemo(() => JSON.parse(localStorage.getItem('studentInfo')), []);
   const token = student?.token;
-  const API_BASE_URL = 'https://backend-9doo.onrender.com/api';
+  const API_BASE_URL = 'https://clg-main-satyams-projects-99d59000.vercel.app//api';
 
 const fetchNotifications = async () => {
   try {
