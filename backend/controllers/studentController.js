@@ -3,12 +3,19 @@ const CreateClass = require('../models/CreateClass');
 const Student = require('../models/Student');
 const Attendance = require('../models/Attendance');
 const haversine = require('haversine-distance');
+const moment = require('moment-timezone');
 
 // Fetch class notifications for a student
+
+
 
 exports.fetchNotifications = async (req, res) => {
   try {
     const { rollNumber } = req.params;
+
+    // Use consistent timezone
+    const serverTime = moment().tz('Asia/Kolkata');
+    const formattedDate = serverTime.format('YYYY-MM-DD');
 
     // Fetch student details
     const student = await Student.findOne({ rollNumber });
@@ -16,45 +23,36 @@ exports.fetchNotifications = async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    // Use server time consistently
-    const serverTime = new Date();
-    const formattedDate = serverTime.toISOString().split('T')[0];
-
-    // Fetch classes for student's year and department scheduled for today
+    // Fetch classes for today
     const classes = await CreateClass.find({
       year: student.year.toString(),
       branch: student.department,
       date: formattedDate
     }).sort({ startTime: 1 });
 
-    // Process each class to determine its exact status
+    // Process notifications with precise time calculation
     const notifications = await Promise.all(classes.map(async (classInfo) => {
-      // Create a new Date object for consistent time comparison
-      const classDate = new Date(classInfo.date);
-      const [startHour, startMinute] = classInfo.startTime.split(':');
-      const [endHour, endMinute] = classInfo.endTime.split(':');
-      
-      const classStartTime = new Date(classDate.getFullYear(), classDate.getMonth(), classDate.getDate(), 
-                                       parseInt(startHour), parseInt(startMinute), 0);
-      const classEndTime = new Date(classDate.getFullYear(), classDate.getMonth(), classDate.getDate(), 
-                                     parseInt(endHour), parseInt(endMinute), 0);
-      
-      // Check if attendance already exists
+      // Create precise time objects
+      const classDate = moment.tz(`${classInfo.date} ${classInfo.startTime}`, 'YYYY-MM-DD HH:mm', 'Asia/Kolkata');
+      const classEndDate = moment.tz(`${classInfo.date} ${classInfo.endTime}`, 'YYYY-MM-DD HH:mm', 'Asia/Kolkata');
+
+      // Check existing attendance
       const existingAttendance = await Attendance.findOne({
         rollNumber,
         className: classInfo.className,
         subject: classInfo.subject,
         time: {
-          $gte: new Date(classInfo.date + 'T00:00:00'),
-          $lt: new Date(classInfo.date + 'T23:59:59')
+          $gte: moment(classDate).startOf('day').toDate(),
+          $lt: moment(classDate).endOf('day').toDate()
         }
       });
 
-      // Calculate precise timing using server time
-      const minutesUntilStart = (classStartTime - serverTime) / (1000 * 60);
-      const minutesFromStart = (serverTime - classStartTime) / (1000 * 60);
-      const isEnded = serverTime > classEndTime;
+      // Calculate time differences
+      const minutesUntilStart = classDate.diff(serverTime, 'minutes');
+      const minutesFromStart = serverTime.diff(classDate, 'minutes');
+      const isEnded = serverTime.isAfter(classEndDate);
 
+      // Determine status
       let status;
       if (existingAttendance) {
         status = 'marked';
@@ -79,13 +77,13 @@ exports.fetchNotifications = async (req, res) => {
         endTime: classInfo.endTime,
         day: classInfo.day,
         status,
-        minutesUntilStart: Math.max(0, Math.floor(minutesUntilStart)),
-        minutesRemaining: status === 'active' ? Math.max(0, Math.floor(15 - minutesFromStart)) : 0,
+        minutesUntilStart: Math.max(0, minutesUntilStart),
+        minutesRemaining: status === 'active' ? Math.max(0, 15 - minutesFromStart) : 0,
         attendanceId: existingAttendance?._id
       };
     }));
 
-    // Filter out expired classes
+    // Filter active notifications
     const activeNotifications = notifications.filter(n => n.status !== 'expired');
 
     res.status(200).json({ 
