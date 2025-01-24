@@ -6,7 +6,6 @@ const haversine = require('haversine-distance');
 
 // Fetch class notifications for a student
 
-
 exports.fetchNotifications = async (req, res) => {
   try {
     const { rollNumber } = req.params;
@@ -98,7 +97,6 @@ exports.fetchNotifications = async (req, res) => {
     res.status(500).json({ message: 'Error fetching notifications' });
   }
 };
-
 
 
 // Submit attendance
