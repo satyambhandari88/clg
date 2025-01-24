@@ -12,7 +12,7 @@ const StudentLogin = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { data } = await axios.post('https://clg-main-satyams-projects-99d59000.vercel.app//api/auth/student/login', { rollNumber, email, password });
+      const { data } = await axios.post('https://clg-main-satyams-projects-99d59000.vercel.app/api/auth/student/login', { rollNumber, email, password });
       localStorage.setItem('studentToken', data.token);
       localStorage.setItem('studentInfo', JSON.stringify(data));
       alert('Login Successful');
