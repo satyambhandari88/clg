@@ -17,7 +17,7 @@ const StudentDashboard = () => {
   const token = student?.token;
   const API_BASE_URL = 'https://backend-9doo.onrender.com/api';
 
-  const fetchNotifications = async () => {
+const fetchNotifications = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/student/notifications/${student.rollNumber}`, {
       method: 'GET',
@@ -28,7 +28,11 @@ const StudentDashboard = () => {
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Failed to fetch notifications');
+    if (!response.ok) throw new Error(data.message || 'Fetch Failed');
+
+    // Log server time for debugging
+    console.log('Server Reported Time:', data.serverTime);
+    console.log('Server Timezone:', data.timezone);
 
     // Process notifications
     setNotifications(data.notifications || []);
@@ -39,21 +43,16 @@ const StudentDashboard = () => {
       if (notification.status === 'starting_soon') {
         new Notification(`Class Starting Soon: ${notification.className}`, {
           body: `${notification.subject} starts in ${notification.minutesUntilStart} minutes`,
-          icon: '/notification-icon.png'
         });
       } else if (notification.status === 'active') {
         new Notification(`Attendance Open: ${notification.className}`, {
-          body: `You can now mark your attendance for ${notification.subject}`,
-          icon: '/notification-icon.png'
+          body: `Attendance now open for ${notification.subject}`,
         });
-        
-        const audio = new Audio('/notification-sound.mp3');
-        audio.play().catch(e => console.log('Audio play failed:', e));
       }
     });
   } catch (err) {
-    setError('Failed to fetch notifications. Please try again later.');
-    console.error('Notification fetch error:', err);
+    console.error('Detailed Notification Error:', err);
+    setError('Notification fetch failed');
   }
 };
 
