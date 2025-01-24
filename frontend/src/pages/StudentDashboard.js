@@ -17,49 +17,44 @@ const StudentDashboard = () => {
   const token = student?.token;
   const API_BASE_URL = 'https://backend-9doo.onrender.com/api';
 
-  const fetchNotifications = async () => {
+   const fetchNotifications = async () => {
     try {
-      const response = await fetch(`https://backend-9doo.onrender.com/api/student/notifications/${student.rollNumber}`, {
+      const response = await fetch(`${API_BASE_URL}/student/notifications/${student.rollNumber}`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
-
+  
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to fetch notifications');
-
-      // Calculate time difference between server and client
-      const serverTime = new Date(data.serverTime).getTime();
-      const clientTime = new Date().getTime();
-      setServerTimeDiff(serverTime - clientTime);
-
+  
+      // Remove the time difference calculation
       setNotifications(data.notifications || []);
       setError(null);
-
-      // Check for classes starting soon or becoming active
+  
+      // Modify notification checks
       data.notifications.forEach(notification => {
+        // Use notification's built-in status for checks
         if (notification.status === 'starting_soon') {
-          // Show notification for class starting soon
           new Notification(`Class Starting Soon: ${notification.className}`, {
             body: `${notification.subject} starts in ${notification.minutesUntilStart} minutes`,
             icon: '/notification-icon.png'
           });
-        } else if (notification.status === 'active' && !notification.notifiedActive) {
-          // Show notification for class becoming active
+        } else if (notification.status === 'active') {
           new Notification(`Attendance Open: ${notification.className}`, {
             body: `You can now mark your attendance for ${notification.subject}`,
             icon: '/notification-icon.png'
           });
           
-          // Play sound for active classes
           const audio = new Audio('/notification-sound.mp3');
           audio.play().catch(e => console.log('Audio play failed:', e));
         }
       });
     } catch (err) {
       setError('Failed to fetch notifications. Please try again later.');
+      console.error('Notification fetch error:', err);
     }
   };
 
