@@ -17,92 +17,43 @@ const StudentDashboard = () => {
   const token = student?.token;
   const API_BASE_URL = 'https://backend-9doo.onrender.com/api';
 
-   const moment = require('moment-timezone');
-
-exports.fetchNotifications = async (req, res) => {
+  const fetchNotifications = async () => {
   try {
-    const { rollNumber } = req.params;
-
-    // Use consistent timezone
-    const serverTime = moment().tz('Asia/Kolkata');
-    const formattedDate = serverTime.format('YYYY-MM-DD');
-
-    // Fetch student details
-    const student = await Student.findOne({ rollNumber });
-    if (!student) {
-      return res.status(404).json({ message: 'Student not found' });
-    }
-
-    // Fetch classes for today
-    const classes = await CreateClass.find({
-      year: student.year.toString(),
-      branch: student.department,
-      date: formattedDate
-    }).sort({ startTime: 1 });
-
-    // Process notifications with precise time calculation
-    const notifications = await Promise.all(classes.map(async (classInfo) => {
-      // Create precise time objects
-      const classDate = moment.tz(`${classInfo.date} ${classInfo.startTime}`, 'YYYY-MM-DD HH:mm', 'Asia/Kolkata');
-      const classEndDate = moment.tz(`${classInfo.date} ${classInfo.endTime}`, 'YYYY-MM-DD HH:mm', 'Asia/Kolkata');
-
-      // Check existing attendance
-      const existingAttendance = await Attendance.findOne({
-        rollNumber,
-        className: classInfo.className,
-        subject: classInfo.subject,
-        time: {
-          $gte: moment(classDate).startOf('day').toDate(),
-          $lt: moment(classDate).endOf('day').toDate()
-        }
-      });
-
-      // Calculate time differences
-      const minutesUntilStart = classDate.diff(serverTime, 'minutes');
-      const minutesFromStart = serverTime.diff(classDate, 'minutes');
-      const isEnded = serverTime.isAfter(classEndDate);
-
-      // Determine status
-      let status;
-      if (existingAttendance) {
-        status = 'marked';
-      } else if (isEnded) {
-        status = 'expired';
-      } else if (minutesFromStart >= 0 && minutesFromStart <= 15) {
-        status = 'active';
-      } else if (minutesUntilStart <= 5) {
-        status = 'starting_soon';
-      } else if (minutesUntilStart > 5) {
-        status = 'upcoming';
-      } else {
-        status = 'expired';
-      }
-
-      return {
-        className: classInfo.className,
-        subject: classInfo.subject,
-        teacherName: classInfo.teacherName,
-        date: classInfo.date,
-        startTime: classInfo.startTime,
-        endTime: classInfo.endTime,
-        day: classInfo.day,
-        status,
-        minutesUntilStart: Math.max(0, minutesUntilStart),
-        minutesRemaining: status === 'active' ? Math.max(0, 15 - minutesFromStart) : 0,
-        attendanceId: existingAttendance?._id
-      };
-    }));
-
-    // Filter active notifications
-    const activeNotifications = notifications.filter(n => n.status !== 'expired');
-
-    res.status(200).json({ 
-      notifications: activeNotifications,
-      serverTime: serverTime.toISOString()
+    const response = await fetch(`${API_BASE_URL}/student/notifications/${student.rollNumber}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
     });
-  } catch (error) {
-    console.error('Error fetching notifications:', error);
-    res.status(500).json({ message: 'Error fetching notifications' });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch notifications');
+
+    // Process notifications
+    setNotifications(data.notifications || []);
+    setError(null);
+
+    // Notification logic
+    data.notifications.forEach(notification => {
+      if (notification.status === 'starting_soon') {
+        new Notification(`Class Starting Soon: ${notification.className}`, {
+          body: `${notification.subject} starts in ${notification.minutesUntilStart} minutes`,
+          icon: '/notification-icon.png'
+        });
+      } else if (notification.status === 'active') {
+        new Notification(`Attendance Open: ${notification.className}`, {
+          body: `You can now mark your attendance for ${notification.subject}`,
+          icon: '/notification-icon.png'
+        });
+        
+        const audio = new Audio('/notification-sound.mp3');
+        audio.play().catch(e => console.log('Audio play failed:', e));
+      }
+    });
+  } catch (err) {
+    setError('Failed to fetch notifications. Please try again later.');
+    console.error('Notification fetch error:', err);
   }
 };
 
