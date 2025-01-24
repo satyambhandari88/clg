@@ -17,9 +17,9 @@ exports.fetchNotifications = async (req, res) => {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    // Get today's date
-    const today = new Date();
-    const formattedDate = today.toISOString().split('T')[0];
+    // Use server time consistently
+    const serverTime = new Date();
+    const formattedDate = serverTime.toISOString().split('T')[0];
 
     // Fetch classes for student's year and department scheduled for today
     const classes = await CreateClass.find({
@@ -30,12 +30,15 @@ exports.fetchNotifications = async (req, res) => {
 
     // Process each class to determine its exact status
     const notifications = await Promise.all(classes.map(async (classInfo) => {
-      const now = new Date();
+      // Create a new Date object for consistent time comparison
+      const classDate = new Date(classInfo.date);
       const [startHour, startMinute] = classInfo.startTime.split(':');
       const [endHour, endMinute] = classInfo.endTime.split(':');
       
-      const classStartTime = new Date(today.setHours(parseInt(startHour), parseInt(startMinute), 0));
-      const classEndTime = new Date(today.setHours(parseInt(endHour), parseInt(endMinute), 0));
+      const classStartTime = new Date(classDate.getFullYear(), classDate.getMonth(), classDate.getDate(), 
+                                       parseInt(startHour), parseInt(startMinute), 0);
+      const classEndTime = new Date(classDate.getFullYear(), classDate.getMonth(), classDate.getDate(), 
+                                     parseInt(endHour), parseInt(endMinute), 0);
       
       // Check if attendance already exists
       const existingAttendance = await Attendance.findOne({
@@ -48,10 +51,10 @@ exports.fetchNotifications = async (req, res) => {
         }
       });
 
-      // Calculate precise timing
-      const minutesUntilStart = (classStartTime - now) / (1000 * 60);
-      const minutesFromStart = (now - classStartTime) / (1000 * 60);
-      const isEnded = now > classEndTime;
+      // Calculate precise timing using server time
+      const minutesUntilStart = (classStartTime - serverTime) / (1000 * 60);
+      const minutesFromStart = (serverTime - classStartTime) / (1000 * 60);
+      const isEnded = serverTime > classEndTime;
 
       let status;
       if (existingAttendance) {
@@ -88,7 +91,7 @@ exports.fetchNotifications = async (req, res) => {
 
     res.status(200).json({ 
       notifications: activeNotifications,
-      serverTime: new Date().toISOString()
+      serverTime: serverTime.toISOString()
     });
   } catch (error) {
     console.error('Error fetching notifications:', error);
