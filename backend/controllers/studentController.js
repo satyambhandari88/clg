@@ -5,13 +5,6 @@ const Attendance = require('../models/Attendance');
 const haversine = require('haversine-distance');
 const moment = require('moment-timezone');
 
-const AddClass = require('../models/AddClass');
-const CreateClass = require('../models/CreateClass');
-const Student = require('../models/Student');
-const Attendance = require('../models/Attendance');
-const haversine = require('haversine-distance');
-const moment = require('moment-timezone');
-
 exports.fetchNotifications = async (req, res) => {
   try {
     const { rollNumber } = req.params;
