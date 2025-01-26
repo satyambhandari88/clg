@@ -5,13 +5,17 @@ const Attendance = require('../models/Attendance');
 const haversine = require('haversine-distance');
 const moment = require('moment-timezone');
 
+const AddClass = require('../models/AddClass');
+const CreateClass = require('../models/CreateClass');
+const Student = require('../models/Student');
+const Attendance = require('../models/Attendance');
+const haversine = require('haversine-distance');
+const moment = require('moment-timezone');
+
 exports.fetchNotifications = async (req, res) => {
   try {
     const { rollNumber } = req.params;
-
-    // Use consistent timezone with precise current time
-    const serverTime = moment().tz('Asia/Kolkata');
-    const formattedDate = serverTime.format('YYYY-MM-DD');
+    const clientTime = req.query.clientTime ? moment(parseInt(req.query.clientTime)) : moment();
 
     // Fetch student details
     const student = await Student.findOne({ rollNumber });
@@ -23,14 +27,14 @@ exports.fetchNotifications = async (req, res) => {
     const classes = await CreateClass.find({
       year: student.year.toString(),
       branch: student.department,
-      date: formattedDate
+      date: clientTime.format('YYYY-MM-DD')
     }).sort({ startTime: 1 });
 
-    // Process notifications with precise time calculation
+    // Process notifications with client time
     const notifications = await Promise.all(classes.map(async (classInfo) => {
-      // Create precise time objects
-      const classDate = moment.tz(`${classInfo.date} ${classInfo.startTime}`, 'YYYY-MM-DD HH:mm', 'Asia/Kolkata');
-      const classEndDate = moment.tz(`${classInfo.date} ${classInfo.endTime}`, 'YYYY-MM-DD HH:mm', 'Asia/Kolkata');
+      // Create precise time objects using client time
+      const classDate = moment(`${classInfo.date} ${classInfo.startTime}`, 'YYYY-MM-DD HH:mm');
+      const classEndDate = moment(`${classInfo.date} ${classInfo.endTime}`, 'YYYY-MM-DD HH:mm');
 
       // Check existing attendance
       const existingAttendance = await Attendance.findOne({
@@ -44,9 +48,9 @@ exports.fetchNotifications = async (req, res) => {
       });
 
       // Calculate time differences
-      const minutesUntilStart = classDate.diff(serverTime, 'minutes');
-      const minutesFromStart = serverTime.diff(classDate, 'minutes');
-      const isEnded = serverTime.isAfter(classEndDate);
+      const minutesUntilStart = classDate.diff(clientTime, 'minutes');
+      const minutesFromStart = clientTime.diff(classDate, 'minutes');
+      const isEnded = clientTime.isAfter(classEndDate);
 
       // Determine status
       let status;
@@ -72,6 +76,7 @@ exports.fetchNotifications = async (req, res) => {
         startTime: classInfo.startTime,
         endTime: classInfo.endTime,
         day: classInfo.day,
+        classCode: classInfo.classCode,
         status,
         minutesUntilStart: Math.max(0, minutesUntilStart),
         minutesRemaining: status === 'active' ? Math.max(0, 15 - minutesFromStart) : 0,
@@ -84,7 +89,7 @@ exports.fetchNotifications = async (req, res) => {
 
     res.status(200).json({ 
       notifications: activeNotifications,
-      serverTime: serverTime.toISOString() // Precise server time
+      clientTime: clientTime.toISOString()
     });
   } catch (error) {
     console.error('Error fetching notifications:', error);
