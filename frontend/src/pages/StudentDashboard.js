@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import '../styles/StudentDashboard.css'; // Assuming the CSS file is named StudentDashboard.css
+import '../styles/StudentDashboard.css';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 import AttendanceModal from '../components/AttendanceModal';
@@ -11,50 +11,51 @@ const StudentDashboard = () => {
   const [error, setError] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
   const [showCamera, setShowCamera] = useState(false);
-  const [serverTimeDiff, setServerTimeDiff] = useState(0);
 
   const student = useMemo(() => JSON.parse(localStorage.getItem('studentInfo')), []);
   const token = student?.token;
-  const API_BASE_URL = 'https://backend-9doo.onrender.com/api';
+  const API_BASE_URL = 'http://localhost:5000/api';
 
-const fetchNotifications = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/student/notifications/${student.rollNumber}`, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Fetch Failed');
-
-    // Log server time for debugging
-    console.log('Server Reported Time:', data.serverTime);
-    console.log('Server Timezone:', data.timezone);
-
-    // Process notifications
-    setNotifications(data.notifications || []);
-    setError(null);
-
-    // Notification logic
-    data.notifications.forEach(notification => {
-      if (notification.status === 'starting_soon') {
-        new Notification(`Class Starting Soon: ${notification.className}`, {
-          body: `${notification.subject} starts in ${notification.minutesUntilStart} minutes`,
-        });
-      } else if (notification.status === 'active') {
-        new Notification(`Attendance Open: ${notification.className}`, {
-          body: `Attendance now open for ${notification.subject}`,
-        });
-      }
-    });
-  } catch (err) {
-    console.error('Detailed Notification Error:', err);
-    setError('Notification fetch failed');
-  }
-};
+  const fetchNotifications = async () => {
+    try {
+      const clientTime = Date.now();
+      const response = await fetch(`${API_BASE_URL}/student/notifications/${student.rollNumber}?clientTime=${clientTime}`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to fetch notifications');
+  
+      // Process notifications
+      setNotifications(data.notifications || []);
+      setError(null);
+  
+      // Notification logic
+      data.notifications.forEach(notification => {
+        if (notification.status === 'starting_soon') {
+          new Notification(`Class Starting Soon: ${notification.className}`, {
+            body: `${notification.subject} starts in ${notification.minutesUntilStart} minutes`,
+            icon: '/notification-icon.png'
+          });
+        } else if (notification.status === 'active') {
+          new Notification(`Attendance Open: ${notification.className}`, {
+            body: `You can now mark your attendance for ${notification.subject}`,
+            icon: '/notification-icon.png'
+          });
+          
+          const audio = new Audio('/notification-sound.mp3');
+          audio.play().catch(e => console.log('Audio play failed:', e));
+        }
+      });
+    } catch (err) {
+      setError('Failed to fetch notifications. Please try again later.');
+      console.error('Notification fetch error:', err);
+    }
+  };
 
   // Request notification permissions on component mount
   useEffect(() => {
