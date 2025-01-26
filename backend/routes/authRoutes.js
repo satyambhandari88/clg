@@ -93,7 +93,7 @@ router.post('/teacher/login', async (req, res) => {
 router.post('/student/login', async (req, res) => {
   const { rollNumber, email, password } = req.body;
   try {
-    const student = await Student.findOne({ rollNumber, email });
+    const student = await Student.findOne({ rollNumber, email, password });
     if (student && (await (password, student.password))) {
       res.json({
         _id: student.id,
