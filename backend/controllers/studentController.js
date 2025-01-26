@@ -5,114 +5,90 @@ const Attendance = require('../models/Attendance');
 const haversine = require('haversine-distance');
 const moment = require('moment-timezone');
 
-// Fetch class notifications for a student
-
-
 exports.fetchNotifications = async (req, res) => {
   try {
-    // Force UTC for consistent calculations
-    moment.tz.setDefault('UTC');
+    const { rollNumber } = req.params;
 
-    const { rollNumber, clientTime } = req.params;
+    // Use consistent timezone with precise current time
+    const serverTime = moment().tz('Asia/Kolkata');
+    const formattedDate = serverTime.format('YYYY-MM-DD');
 
-    // Server UTC time
-    const serverTime = moment.utc();
-
-    // Calculate the time difference between server and client
-    const clientMoment = moment(clientTime, 'YYYY-MM-DDTHH:mm:ss.SSSZ'); // Parse client-provided time
-    const timeOffset = clientMoment.diff(serverTime, 'milliseconds');
-
-    // Adjust server time to match client time
-    const adjustedServerTime = serverTime.clone().add(timeOffset, 'milliseconds');
-
-    const formattedDate = adjustedServerTime.format('YYYY-MM-DD');
-
-    console.log('Server UTC Time:', serverTime.toISOString());
-    console.log('Client Time:', clientMoment.toISOString());
-    console.log('Adjusted Server Time:', adjustedServerTime.toISOString());
-
-    // Fetch the student
+    // Fetch student details
     const student = await Student.findOne({ rollNumber });
     if (!student) {
       return res.status(404).json({ message: 'Student not found' });
     }
 
-    // Fetch today's classes for the student's department and year
+    // Fetch classes for today
     const classes = await CreateClass.find({
       year: student.year.toString(),
       branch: student.department,
-      date: formattedDate,
+      date: formattedDate
     }).sort({ startTime: 1 });
 
-    const notifications = await Promise.all(
-      classes.map(async (classInfo) => {
-        // Convert class times to UTC
-        const classStartTime = moment.utc(`${classInfo.date} ${classInfo.startTime}`, 'YYYY-MM-DD HH:mm');
-        const classEndTime = moment.utc(`${classInfo.date} ${classInfo.endTime}`, 'YYYY-MM-DD HH:mm');
+    // Process notifications with precise time calculation
+    const notifications = await Promise.all(classes.map(async (classInfo) => {
+      // Create precise time objects
+      const classDate = moment.tz(`${classInfo.date} ${classInfo.startTime}`, 'YYYY-MM-DD HH:mm', 'Asia/Kolkata');
+      const classEndDate = moment.tz(`${classInfo.date} ${classInfo.endTime}`, 'YYYY-MM-DD HH:mm', 'Asia/Kolkata');
 
-        // Check existing attendance
-        const existingAttendance = await Attendance.findOne({
-          rollNumber,
-          className: classInfo.className,
-          subject: classInfo.subject,
-          time: {
-            $gte: moment(classStartTime).startOf('day').toDate(),
-            $lt: moment(classStartTime).endOf('day').toDate(),
-          },
-        });
-
-        // Time calculations relative to the adjusted server time
-        const minutesUntilStart = classStartTime.diff(adjustedServerTime, 'minutes');
-        const minutesFromStart = adjustedServerTime.diff(classStartTime, 'minutes');
-        const isEnded = adjustedServerTime.isAfter(classEndTime);
-
-        // Determine status
-        let status;
-        if (existingAttendance) {
-          status = 'marked';
-        } else if (isEnded) {
-          status = 'expired';
-        } else if (minutesFromStart >= 0 && minutesFromStart <= 15) {
-          status = 'active';
-        } else if (minutesUntilStart <= 5) {
-          status = 'starting_soon';
-        } else if (minutesUntilStart > 5) {
-          status = 'upcoming';
-        } else {
-          status = 'expired';
+      // Check existing attendance
+      const existingAttendance = await Attendance.findOne({
+        rollNumber,
+        className: classInfo.className,
+        subject: classInfo.subject,
+        time: {
+          $gte: moment(classDate).startOf('day').toDate(),
+          $lt: moment(classDate).endOf('day').toDate()
         }
+      });
 
-        return {
-          className: classInfo.className,
-          subject: classInfo.subject,
-          teacherName: classInfo.teacherName,
-          date: classInfo.date,
-          startTime: classInfo.startTime,
-          endTime: classInfo.endTime,
-          status,
-          minutesUntilStart: Math.max(0, minutesUntilStart),
-          minutesRemaining: status === 'active' ? Math.max(0, 15 - minutesFromStart) : 0,
-          attendanceId: existingAttendance?._id,
-        };
-      })
-    );
+      // Calculate time differences
+      const minutesUntilStart = classDate.diff(serverTime, 'minutes');
+      const minutesFromStart = serverTime.diff(classDate, 'minutes');
+      const isEnded = serverTime.isAfter(classEndDate);
+
+      // Determine status
+      let status;
+      if (existingAttendance) {
+        status = 'marked';
+      } else if (isEnded) {
+        status = 'expired';
+      } else if (minutesFromStart >= 0 && minutesFromStart <= 15) {
+        status = 'active';
+      } else if (minutesUntilStart <= 5) {
+        status = 'starting_soon';
+      } else if (minutesUntilStart > 5) {
+        status = 'upcoming';
+      } else {
+        status = 'expired';
+      }
+
+      return {
+        className: classInfo.className,
+        subject: classInfo.subject,
+        teacherName: classInfo.teacherName,
+        date: classInfo.date,
+        startTime: classInfo.startTime,
+        endTime: classInfo.endTime,
+        day: classInfo.day,
+        status,
+        minutesUntilStart: Math.max(0, minutesUntilStart),
+        minutesRemaining: status === 'active' ? Math.max(0, 15 - minutesFromStart) : 0,
+        attendanceId: existingAttendance?._id
+      };
+    }));
 
     // Filter active notifications
-    const activeNotifications = notifications.filter((n) => n.status !== 'expired');
+    const activeNotifications = notifications.filter(n => n.status !== 'expired');
 
-    res.status(200).json({
+    res.status(200).json({ 
       notifications: activeNotifications,
-      serverTime: serverTime.toISOString(),
-      adjustedServerTime: adjustedServerTime.toISOString(),
-      clientTime: clientMoment.toISOString(),
-      timezone: 'UTC',
+      serverTime: serverTime.toISOString() // Precise server time
     });
   } catch (error) {
-    console.error('Notification Fetch Error:', error);
-    res.status(500).json({
-      message: 'Error fetching notifications',
-      errorDetails: error.message,
-    });
+    console.error('Error fetching notifications:', error);
+    res.status(500).json({ message: 'Error fetching notifications' });
   }
 };
 
